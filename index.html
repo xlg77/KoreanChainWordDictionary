@@ -104,6 +104,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="t-play" aria-selected="true">이어말하기</button>
     <button class="tab" role="tab" id="t-dict" aria-selected="false">글자 사전</button>
+    <button class="tab" role="tab" id="t-find" aria-selected="false">포함 단어 찾기</button>
     <button class="tab" role="tab" id="t-help" aria-selected="false">분석 방식</button>
   </div>
 
@@ -116,8 +117,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
           <button class="btn" type="submit">분석</button>
         </form>
       </div>
-      <div class="row">
-        <button class="btn ghost small" id="opening" type="button">선공 추천 보기</button>
+      <div class="row">        <button class="btn ghost small" id="opening" type="button">선공 추천 보기</button>
         <button class="btn ghost small" id="reset" type="button">새 게임</button>
       </div>
       <div id="logbox" hidden>
@@ -140,6 +140,19 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
     <div class="grid" id="grid"></div>
   </section>
 
+  <section id="v-find" hidden class="panel">
+    <div>
+      <label class="lbl" for="find-inp">단어에 포함된 글자 검색</label>
+      <form class="input-row" id="find-form" style="margin-top:6px">
+        <input type="text" id="find-inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="예: 사과, 학교, 사랑">
+        <button class="btn" type="submit">찾기</button>
+      </form>
+    </div>
+    <p class="note" id="find-stat">찾고 싶은 글자나 문자열을 입력하세요. 단어의 앞·중간·끝 어디에 포함되어도 검색합니다.</p>
+    <div class="words" id="find-results" aria-live="polite"></div>
+    <div class="row" id="find-more-row" hidden><button type="button" class="btn ghost" id="find-more">결과 더 보기</button></div>
+  </section>
+
   <section id="v-help" hidden class="panel explain">
     <h2>어떻게 분석했나</h2>
     <p>단어 548,485개를 모두 읽어 글자를 점, 단어를 화살표(첫 글자 → 끝 글자)로 둔 그래프를 만들었습니다. 끝글자에서 이어갈 단어가 없는 글자를 시작점으로 거꾸로 풀어 모든 글자의 승패를 정했습니다.</p>
@@ -159,6 +172,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
 <script>
 (function(){
   var D=null, chain=[], used=new Set(), mode={type:'idle'}, filter='all', limit=30, picked=null, cache={}, dfil='all', view='long', llim=60, scope='best';
+  var findMatches=[], findLimit=200, findCache={};
   var $=function(id){return document.getElementById(id)};
   var LBL={W:'필승',L:'필패',D:'루프'};
 
@@ -236,8 +250,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
     var x=mode.x, starts, V, head;
     if(mode.type==='open'){
       starts=Object.keys(D.w).join(''); x=null;
-      V={k:'W',t:'선공 추천',p:'끝글자가 막다른 글자인 단어일수록 상대는 바로 지게 됩니다. 한방 단어를 먼저 확인하세요.'};
-      head='<div class="big v-W" aria-hidden="true">先</div>';
+      V={k:'W',t:'선공 추천',p:'끝글자가 막다른 글자인 단어일수록 상대는 바로 지게 됩니다. 한방 단어를 먼저 확인하세요.'};      head='<div class="big v-W" aria-hidden="true">先</div>';
     } else {
       starts=startsOf(x); V=verdict(x);
       head='<div class="big v-'+V.k+'" aria-hidden="true">'+esc(x)+'</div>';
@@ -335,7 +348,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
     chain.push({w:w,by:by}); used.add(w); renderLog(); analyze(w,by);
   }
   function setMode(t){
-    ['play','dict','help'].forEach(function(k){
+    ['play','dict','find','help'].forEach(function(k){
       $('t-'+k).setAttribute('aria-selected',String(k===t));
       $('v-'+k).hidden=k!==t;
     });
@@ -356,8 +369,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
   }
 
   function init(){
-    var c={W:0,L:0,D:0},nw=0;
-    Object.keys(D.n).forEach(function(k){c[D.n[k][0]]++});
+    var c={W:0,L:0,D:0},nw=0;    Object.keys(D.n).forEach(function(k){c[D.n[k][0]]++});
     Object.keys(D.w).forEach(function(s){Object.keys(D.w[s]).forEach(function(e){nw+=D.w[s][e].split(',').length})});
     $('stat').textContent='단어 '+nw.toLocaleString()+'개 · 글자 '+Object.keys(D.n).length.toLocaleString()+'개 분석 · 필승 '+c.W+' · 필패 '+c.L+' · 루프 '+c.D;
     render(); renderDict();
@@ -399,7 +411,46 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
   function fallback(w){var i=$('inp'),old=i.value;i.value=w;i.select();try{document.execCommand('copy')}catch(e){}i.value=old}
   $('t-play').onclick=function(){setMode('play')};
   $('t-dict').onclick=function(){setMode('dict')};
+  $('t-find').onclick=function(){setMode('find')};
   $('t-help').onclick=function(){setMode('help')};
+  function searchContainedWords(query){
+    query=query.trim().normalize('NFC');
+    if(!query)return [];
+    if(findCache[query])return findCache[query];
+    var found=[];
+    Object.keys(D.w).forEach(function(s){
+      var ends=D.w[s];
+      Object.keys(ends).forEach(function(e){
+        ends[e].split(',').forEach(function(mid){
+          var word=s+mid+e;
+          if(word.indexOf(query)!==-1)found.push(word);
+        });
+      });
+    });
+    found.sort(function(a,b){return a.length-b.length||(a<b?-1:a>b?1:0)});
+    findCache[query]=found;
+    return found;
+  }
+  function renderFind(){
+    var q=$('find-inp').value.trim();
+    var stat=$('find-stat'), results=$('find-results'), moreRow=$('find-more-row');
+    if(!q){stat.textContent='찾고 싶은 글자나 문자열을 입력하세요. 단어의 앞·중간·끝 어디에 포함되어도 검색합니다.';results.innerHTML='';moreRow.hidden=true;return}
+    findMatches=searchContainedWords(q);
+    stat.textContent='“'+q+'” 포함 단어 '+findMatches.length.toLocaleString()+'개';
+    results.innerHTML=findMatches.slice(0,findLimit).map(function(w){
+      return '<button type="button" class="w" data-find-word="'+esc(w)+'">'+esc(w)+'</button>';
+    }).join('')||'<p class="empty">포함된 단어가 없습니다.</p>';
+    moreRow.hidden=findMatches.length<=findLimit;
+    $('find-more').textContent='결과 더 보기 ('+(findMatches.length-findLimit).toLocaleString()+'개 남음)';
+  }
+  $('find-form').addEventListener('submit',function(e){e.preventDefault();findLimit=200;renderFind()});
+  $('find-more').addEventListener('click',function(){findLimit+=200;renderFind()});
+  $('find-results').addEventListener('click',function(e){
+    var t=e.target.closest('[data-find-word]');if(!t)return;
+    var w=t.getAttribute('data-find-word');
+    $('inp').value=w;mode={type:'chain',x:w[w.length-1],unknown:!has(w)};
+    filter='all';limit=30;picked=null;hidePick();render();setMode('play');window.scrollTo(0,0);
+  });
   $('dfilters').addEventListener('click',function(e){var t=e.target.closest('button');if(!t||!t.dataset.df)return;dfil=t.dataset.df;renderDict()});
   $('grid').addEventListener('click',function(e){var t=e.target.closest('button');if(!t||!t.dataset.c)return;
     mode={type:'char',x:t.dataset.c};filter='all';limit=30;hidePick();render();setMode('play');window.scrollTo(0,0)});
