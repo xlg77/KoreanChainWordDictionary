@@ -380,7 +380,7 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
     chain.push({w:w,by:by}); used.add(w); renderLog(); analyze(w,by);
   }
   function setMode(t){
-    ['play','dict','find','help'].forEach(function(k){
+    ['play','find','help'].forEach(function(k){
       $('t-'+k).setAttribute('aria-selected',String(k===t));
       $('v-'+k).hidden=k!==t;
     });
@@ -390,21 +390,12 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
   }
   function hidePick(){picked=null;$('pickbar').hidden=true}
 
-  function renderDict(){
-    var fs=[['all','전체'],['W','필승'],['H','한방(막다른 글자)'],['D','루프'],['L','필패']];
-    $('dfilters').innerHTML=fs.map(function(f){return '<button type="button" class="f" data-df="'+f[0]+'" aria-pressed="'+(dfil===f[0])+'">'+f[1]+'</button>'}).join('');
-    var chars=Object.keys(D.n).filter(function(c){var n=D.n[c];
-      if(dfil==='all')return true; if(dfil==='H')return n[3]===0; return n[0]===dfil&&n[3]>0;}).sort();
-    $('grid').innerHTML=chars.map(function(c){var n=D.n[c],k=n[3]===0?'L':n[0];
-      var d=n[3]===0?'막힘':n[0]==='W'?(Math.floor(n[1]/2)+1)+'수':n[0]==='L'?(n[1]/2)+'수':'루프';
-      return '<button type="button" class="cell v-'+k+'" data-c="'+c+'"><span class="c">'+c+'</span><span class="d">'+d+'</span></button>';}).join('')||'<p class="empty">해당하는 글자가 없습니다.</p>';
-  }
 
   function init(){
     var c={W:0,L:0,D:0},nw=0;    Object.keys(D.n).forEach(function(k){c[D.n[k][0]]++});
     Object.keys(D.w).forEach(function(s){Object.keys(D.w[s]).forEach(function(e){nw+=D.w[s][e].split(',').length})});
     $('stat').textContent='단어 '+nw.toLocaleString()+'개 · 글자 '+Object.keys(D.n).length.toLocaleString()+'개 분석 · 필승 '+c.W+' · 필패 '+c.L+' · 루프 '+c.D;
-    render(); renderDict();
+    render();
   }
 
   $('form').addEventListener('submit',function(e){
@@ -489,9 +480,6 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
     $('inp').value=w;mode={type:'chain',x:w[w.length-1],unknown:!has(w)};
     filter='all';limit=30;picked=null;hidePick();render();setMode('play');window.scrollTo(0,0);
   });
-  $('dfilters').addEventListener('click',function(e){var t=e.target.closest('button');if(!t||!t.dataset.df)return;dfil=t.dataset.df;renderDict()});
-  $('grid').addEventListener('click',function(e){var t=e.target.closest('button');if(!t||!t.dataset.c)return;
-    mode={type:'char',x:t.dataset.c};filter='all';limit=30;hidePick();render();setMode('play');window.scrollTo(0,0)});
 
   fetch('data.json').then(function(r){return r.json()}).then(function(j){
     D=j; init();
