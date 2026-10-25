@@ -111,11 +111,12 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
   <section id="v-play" class="wrap" style="gap:16px">
     <div class="panel">
       <div>
-        <label class="lbl" for="inp">상대가 낸 단어 (한 글자만 입력하면 그 글자로 분석)</label>
+        <label class="lbl" for="inp">상대가 낸 단어</label>
         <form class="input-row" id="form" style="margin-top:6px">
           <input type="text" id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="예: 사과">
           <button class="btn" type="submit">분석</button>
         </form>
+        <label class="note" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="single-char-mode"> 한 글자 입력을 글자 분석으로 처리</label>
       </div>
       <div class="row">        <button class="btn ghost small" id="opening" type="button">선공 추천 보기</button>
         <button class="btn ghost small" id="reset" type="button">새 게임</button>
@@ -380,7 +381,13 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
     var v=$('inp').value.replace(/\s+/g,''); if(!v)return;
     if(!/^[가-힣]+$/.test(v)){$('inp').value='';return}
     $('inp').value='';
-    if(v.length===1){mode={type:'char',x:v};filter='all';limit=30;hidePick();render();return}
+    if(v.length===1){
+      if(!$('single-char-mode').checked){
+        $('result').innerHTML='<p class="empty">한 글자만 분석하려면 ‘한 글자 입력을 글자 분석으로 처리’를 선택하세요.<br>상대가 낸 단어를 분석하려면 두 글자 이상 입력하세요.</p>';
+        return;
+      }
+      mode={type:'char',x:v};filter='all';limit=30;hidePick();render();return;
+    }
     addWord(v,'opp');
   });
   $('opening').onclick=function(){mode={type:'open'};filter='all';limit=30;hidePick();render()};
