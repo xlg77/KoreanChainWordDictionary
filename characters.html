@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>글자별 승패 사전 · 끝말잇기 필승 사전</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eef1f4;--surface:#fff;--ink:#16212b;--muted:#5d6b78;--line:#d5dce3;--win:#0b7a5c;--win-bg:#dff3ec;--loop:#9a6200;--loop-bg:#fbefd2;--lose:#b3343f;--lose-bg:#f9e0e2;--accent:#1f4f8f;--display:"Black Han Sans","Noto Sans KR",sans-serif;--body:"IBM Plex Sans KR","Noto Sans KR",system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#0f161d;--surface:#18222c;--ink:#e6edf3;--muted:#92a0ad;--line:#2b3947;--win:#4fd1a5;--win-bg:#10382e;--loop:#e9b54e;--loop-bg:#3b2d0e;--lose:#f08a93;--lose-bg:#40181d;--accent:#7fb0ee;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);padding:20px 16px 50px}.wrap{max-width:900px;margin:auto;display:flex;flex-direction:column;gap:14px}h1{font:400 28px/1.2 var(--display);margin:0}.sub,.note{color:var(--muted);font-size:13px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px}.row,.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.btn,.f{font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:var(--surface);color:var(--ink);cursor:pointer}.btn{background:var(--accent);color:white;border-color:var(--accent)}input{font:inherit;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}.f[aria-pressed=true]{background:var(--ink);color:var(--bg)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}.cell{font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:var(--surface);color:var(--ink)}.cell .c{font:400 23px/1.2 var(--display)}.cell .d{font-size:10.5px;font-weight:600}.v-W{background:var(--win-bg);color:var(--win)}.v-L{background:var(--lose-bg);color:var(--lose)}.v-D{background:var(--loop-bg);color:var(--loop)}.note{margin:0}@media(max-width:480px){h1{font-size:24px}.grid{grid-template-columns:repeat(auto-fill,minmax(48px,1fr))}}
+</style>
+</head>
+<body><main class="wrap">
+<header><h1>글자별 승패 사전</h1><p class="sub">글자 하나를 누르면 이어말하기에서 해당 글자를 분석합니다.</p></header>
+<div class="row"><a class="btn" href="./">이어말하기로 돌아가기</a></div>
+<section class="panel">
+<div class="filters" id="filters"><button class="f" data-filter="all" aria-pressed="true">전체</button><button class="f" data-filter="W" aria-pressed="false">필승</button><button class="f" data-filter="D" aria-pressed="false">루프</button><button class="f" data-filter="L" aria-pressed="false">필패</button><button class="f" data-filter="H" aria-pressed="false">막힘</button></div>
+<div class="row"><input id="search" type="text" placeholder="글자 검색 (예: 가)" maxlength="1" aria-label="글자 검색"><span class="note" id="stat">사전 불러오는 중…</span></div>
+<p class="note">글자 아래 숫자는 필승이면 내 수 횟수, 필패면 버틸 수 있는 수입니다. 누르면 이어말하기에서 분석합니다.</p>
+<div class="grid" id="grid"></div>
+</section></main>
+<script>
+(function(){
+var D=null,filter='all',q='';
+var $=function(id){return document.getElementById(id)};
+function render(){
+if(!D)return;
+var chars=Object.keys(D.n).sort().filter(function(c){var n=D.n[c];if(q&&c!==q)return false;if(filter==='all')return true;if(filter==='H')return n[3]===0;return n[0]===filter&&n[3]>0});
+$('grid').innerHTML=chars.map(function(c){var n=D.n[c],k=n[3]===0?'L':n[0],d=n[3]===0?'막힘':n[0]==='W'?(Math.floor(n[1]/2)+1)+'수':n[0]==='L'?(n[1]/2)+'수':'루프';return '<button class="cell v-'+k+'" data-char="'+c+'"><span class="c">'+c+'</span><span class="d">'+d+'</span></button>'}).join('')||'<p class="note">해당하는 글자가 없습니다.</p>';
+$('stat').textContent='표시 '+chars.length.toLocaleString()+' / 전체 '+Object.keys(D.n).length.toLocaleString()+'글자';
+}
+$('filters').addEventListener('click',function(e){var b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;Array.from($('filters').querySelectorAll('button')).forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});render()});
+$('search').addEventListener('input',function(){q=this.value.trim();render()});
+$('grid').addEventListener('click',function(e){var b=e.target.closest('[data-char]');if(b)location.href='./?char='+encodeURIComponent(b.dataset.char)});
+fetch('data.json').then(function(r){if(!r.ok)throw Error();return r.json()}).then(function(j){D=j;render()}).catch(function(){$('stat').textContent='사전 데이터를 불러오지 못했습니다.'});
+})();
+</script></body></html>
