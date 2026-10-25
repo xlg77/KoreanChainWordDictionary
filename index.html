@@ -106,6 +106,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
     <button class="tab" role="tab" id="t-dict" aria-selected="false">글자 사전</button>
     <button class="tab" role="tab" id="t-find" aria-selected="false">포함 단어 찾기</button>
     <button class="tab" role="tab" id="t-help" aria-selected="false">분석 방식</button>
+    <a class="tab" href="characters.html" style="text-decoration:none">글자 사전 전체 페이지 ↗</a>
   </div>
 
   <section id="v-play" class="wrap" style="gap:16px">
@@ -463,6 +464,8 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
 
   fetch('data.json').then(function(r){return r.json()}).then(function(j){
     D=j; init();
+    var charParam=new URLSearchParams(location.search).get("char");
+    if(charParam && D.n[charParam]){mode={type:"char",x:charParam};filter="all";limit=30;setMode("play");render();}
   }).catch(function(){$('result').innerHTML='<p class="empty">사전 데이터를 불러오지 못했습니다. 새로고침해 주세요.</p>';$('stat').textContent='불러오기 실패'});
 })();
 </script>
