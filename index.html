@@ -134,7 +134,6 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
 
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="t-play" aria-selected="true">이어말하기</button>
-    <button class="tab" role="tab" id="t-dict" aria-selected="false">글자 사전</button>
     <button class="tab" role="tab" id="t-find" aria-selected="false">포함 단어 찾기</button>
     <button class="tab" role="tab" id="t-help" aria-selected="false">분석 방식</button>
     <a class="tab" href="characters.html" style="text-decoration:none">글자별 승패 사전 ↗</a>
@@ -159,17 +158,6 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
     </div>
 
     <div class="panel" id="result"><p class="empty">사전을 불러오는 중입니다.</p></div>
-  </section>
-
-  <section id="v-dict" hidden class="panel">
-    <div class="filters" id="dfilters"></div>
-    <div class="legend">
-      <span style="color:var(--win)"><i style="background:var(--win-bg)"></i>이 글자가 오면 내가 이김</span>
-      <span style="color:var(--loop)"><i style="background:var(--loop-bg)"></i>루프</span>
-      <span style="color:var(--lose)"><i style="background:var(--lose-bg)"></i>내가 짐</span>
-    </div>
-    <p class="note">글자 아래 숫자는 필승이면 내 수 횟수, 필패면 버틸 수 있는 수입니다. 누르면 이어말하기에서 분석합니다.</p>
-    <div class="grid" id="grid"></div>
   </section>
 
   <section id="v-find" hidden class="panel">
@@ -203,7 +191,7 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
 
 <script>
 (function(){
-  var D=null, chain=[], used=new Set(), mode={type:'idle'}, filter='all', limit=30, picked=null, cache={}, dfil='all', view='long', llim=60, scope='best';
+  var D=null, chain=[], used=new Set(), mode={type:'idle'}, filter='all', limit=30, picked=null, cache={}, view='long', llim=60, scope='best';
   var findMatches=[], findLimit=200, findCache={};
   var $=function(id){return document.getElementById(id)};
   var LBL={W:'필승',L:'필패',D:'루프'};
@@ -439,7 +427,6 @@ input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
   };
   function fallback(w){var i=$('inp'),old=i.value;i.value=w;i.select();try{document.execCommand('copy')}catch(e){}i.value=old}
   $('t-play').onclick=function(){setMode('play')};
-  $('t-dict').onclick=function(){setMode('dict')};
   $('t-find').onclick=function(){setMode('find')};
   $('t-help').onclick=function(){setMode('help')};
   function searchContainedWords(query){
