@@ -91,6 +91,37 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
 .explain p{margin:0}
 @media (max-width:480px){h1{font-size:24px}.big{width:72px;height:72px;font-size:42px}.g{grid-template-columns:54px 1fr}}
 @media (prefers-reduced-motion:no-preference){.panel{transition:border-color .15s}}
+
+/* Refreshed visual system */
+:root{--bg:#f4f6fa;--surface:#fff;--ink:#182230;--muted:#687588;--line:#e0e6ef;--win:#087f5b;--win-bg:#e2f7ee;--loop:#956000;--loop-bg:#fff2d4;--lose:#bd3445;--lose-bg:#ffeaed;--accent:#3659d9;--accent-bg:#edf1ff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1220;--surface:#141d2d;--ink:#edf2ff;--muted:#a1aec2;--line:#2a3850;--win:#5ce0b0;--win-bg:#10372d;--loop:#ffd166;--loop-bg:#3b2e12;--lose:#ff8996;--lose-bg:#421c27;--accent:#91a7ff;--accent-bg:#222f55}}
+body{padding-top:28px;line-height:1.6}
+.wrap{max-width:860px;gap:18px}
+h1{font-size:clamp(27px,4vw,36px);letter-spacing:-.035em}
+.sub{font-size:14px;margin-top:7px}
+header{padding:8px 2px 5px}
+.tabs{padding:5px;background:color-mix(in srgb,var(--surface) 75%,var(--bg));border:1px solid var(--line);border-radius:13px;gap:5px}
+.tab{border:0;border-radius:9px;padding:9px 13px;transition:background .15s,color .15s,transform .15s}
+.tab:hover{transform:translateY(-1px)}
+.tab[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.panel{border-radius:16px;padding:clamp(14px,3vw,22px);gap:16px;box-shadow:0 5px 22px #17243a0a}
+input[type=text]{border-radius:11px;padding:12px 14px;background:var(--bg)}
+.btn{border-radius:10px;transition:filter .15s,transform .15s;padding:10px 16px}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{border-color:var(--line);background:var(--surface);color:var(--accent)}
+.chip{border-radius:9px}
+.big{border-radius:16px;box-shadow:inset 0 0 0 5px #ffffff24}
+.g{border-radius:12px;padding:12px}
+.badge{border-radius:9px}
+.w{border-radius:8px;padding:5px 10px;transition:transform .12s,border-color .12s}
+.w:hover{transform:translateY(-1px)}
+.f{border-radius:9px;padding:7px 12px}
+.grid{gap:7px}
+.cell{border-radius:11px;min-height:59px;transition:transform .12s,box-shadow .12s}
+.cell:hover{transform:translateY(-2px);box-shadow:0 4px 12px #17243a12}
+.pick{box-shadow:0 -8px 30px #17243a18;backdrop-filter:blur(14px)}
+@media(max-width:480px){body{padding-top:16px}.tabs{gap:3px}.tab{font-size:13px;padding:8px 10px}.panel{border-radius:13px}.input-row{align-items:stretch}.btn{padding:9px 12px}}
+
 </style>
 
 </head>
@@ -106,7 +137,7 @@ label.lbl{font-size:12.5px;color:var(--muted);letter-spacing:.02em}
     <button class="tab" role="tab" id="t-dict" aria-selected="false">글자 사전</button>
     <button class="tab" role="tab" id="t-find" aria-selected="false">포함 단어 찾기</button>
     <button class="tab" role="tab" id="t-help" aria-selected="false">분석 방식</button>
-    <a class="tab" href="characters.html" style="text-decoration:none">글자 사전 전체 페이지 ↗</a>
+    <a class="tab" href="characters.html" style="text-decoration:none">글자별 승패 사전 ↗</a>
   </div>
 
   <section id="v-play" class="wrap" style="gap:16px">
